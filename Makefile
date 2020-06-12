@@ -32,7 +32,7 @@ INSTALL_DIR?=$(shell hack/build/goinstalldir.sh)
 COMMIT?=$(shell git rev-parse HEAD 2>/dev/null)
 LD_FLAGS:=-X sigs.k8s.io/kind/pkg/cmd/kind/version.GitCommit=$(COMMIT)
 # the output binary name, overridden when cross compiling
-KIND_BINARY_NAME?=sysbox-kind
+KIND_BINARY_NAME?=kind-sysbox
 # the container cli to use e.g. docker,podman
 DOCKER?=$(shell which docker || which podman || echo "docker")
 export DOCKER
@@ -40,14 +40,14 @@ export DOCKER
 all: build
 
 # builds kind in a container, outputs to $(OUT_DIR)
-sysbox-kind:
+kind-sysbox:
 	hack/go_container.sh go build -v -o /out/$(KIND_BINARY_NAME) -ldflags "$(LD_FLAGS)"
 
-sysbox-kind-debug:
+kind-sysbox-debug:
 	hack/go_container.sh go build -v -o /out/$(KIND_BINARY_NAME) -ldflags "$(LD_FLAGS)" -gcflags="all=-N -l"
 
 # alias for building kind
-build: sysbox-kind
+build: kind-sysbox
 
 # use: make install INSTALL_DIR=/usr/local/bin
 install: build
@@ -76,4 +76,4 @@ lint:
 # unit test alias
 test: unit
 
-.PHONY: all sysbox-kind build install clean-cache clean-output clean unit test lint
+.PHONY: all kind-sysbox kind-sysbox-debug build install clean-cache clean-output clean unit test lint
