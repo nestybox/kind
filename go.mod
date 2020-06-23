@@ -16,3 +16,5 @@ require (
 	sigs.k8s.io/kind v0.8.1
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace sigs.k8s.io/kind => ./
