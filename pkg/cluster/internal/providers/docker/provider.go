@@ -123,9 +123,28 @@ func (p *Provider) DeleteNodes(n []nodes.Node) error {
 	}
 	const command = "docker"
 	args := make([]string, 0, len(n)+3) // allocate once
+
+	//
+	// Nestybox: use docker stop + docker rm for a more graceful teardown of the
+	// cluster. This allows the sysbox runtime to better handle the cluster's
+	// destruction.
+	//
+
+	args = append(args,
+		"stop",
+		"-t",
+		"0",
+	)
+	for _, node := range n {
+		args = append(args, node.String())
+	}
+	if err := exec.Command(command, args...).Run(); err != nil {
+		return errors.Wrap(err, "failed to stop nodes")
+	}
+
+	args = args[:0]
 	args = append(args,
 		"rm",
-		"-f", // force the container to be delete now
 		"-v", // delete volumes
 	)
 	for _, node := range n {
