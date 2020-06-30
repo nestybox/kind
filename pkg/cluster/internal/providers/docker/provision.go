@@ -170,7 +170,15 @@ func commonArgs(cluster string, cfg *config.Cluster) ([]string, error) {
 		// retries is 0, so only restart on reboots.
 		// however this _actually_ means the same thing as always
 		// so the closest thing is on-failure:1, which will retry *once*
-		"--restart=on-failure:1",
+		//
+		// Nestybox: skip "--restart" as it conflicts with "--rm". The latter
+		// allows Docker + Sysbox to delete the containers that make up the
+		// cluster much faster. Without "--rm", when a container stops, sysbox
+		// must move some data from host volumes it manages to the container's
+		// rootfs. This can be slow (several seconds per container), and thus
+		// slows down the process of deleting the cluster.
+		//
+		// "--restart=on-failure:1",
 	}
 
 	// enable IPv6 if necessary
@@ -207,7 +215,7 @@ func runArgsForNode(node *config.Node, clusterIPFamily config.ClusterIPFamily, n
 
 		// Nestybox: use Sysbox
 		"--runtime=sysbox-runc",
-
+		"--rm",
 		"--hostname", name, // make hostname match container name
 		"--name", name, // ... and set the container name
 		// label the node with the role ID
