@@ -91,6 +91,11 @@ run_in_go_container() {
 }
 
 mkdir -p "${OUT_DIR}"
+# Temporarily change out_dir permisions to grant write access in userns-remap scenarios.
+chmod 777 "${OUT_DIR}"
 "${DOCKER}" volume inspect "${CACHE_VOLUME}" >/dev/null 2>&1 || "${DOCKER}" volume create "${CACHE_VOLUME}" >/dev/null
 detect_and_set_goos_goarch
 run_in_go_container "$@"
+# Flip write permissions back to defaults and chown generated artifacts.
+chmod 775 "${OUT_DIR}"
+sudo chown $(id -u):$(id -g) -R "${OUT_DIR}"
